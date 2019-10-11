@@ -283,7 +283,7 @@ class RSolr::Client
 
     result
   end
-  
+
   def connection
     @connection ||= begin
       conn_opts = { request: {} }
@@ -295,7 +295,7 @@ class RSolr::Client
 
       Faraday.new(conn_opts) do |conn|
         conn.basic_auth(uri.user, uri.password) if uri.user && uri.password
-        conn.response :raise_error
+        conn.response :logger
         conn.request :retry, max: options[:retry_after_limit], interval: 0.05,
                              interval_randomness: 0.5, backoff_factor: 2,
                              exceptions: ['Faraday::Error', 'Timeout::Error'] if options[:retry_503]
