@@ -295,7 +295,8 @@ class RSolr::Client
 
       Faraday.new(conn_opts) do |conn|
         conn.basic_auth(uri.user, uri.password) if uri.user && uri.password
-        conn.response :logger
+        conn.response :logger if ENV["SOLR_LOG_HTTP"].present?
+        conn.response :raise_error
         conn.request :retry, max: options[:retry_after_limit], interval: 0.05,
                              interval_randomness: 0.5, backoff_factor: 2,
                              exceptions: ['Faraday::Error', 'Timeout::Error'] if options[:retry_503]
