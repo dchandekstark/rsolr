@@ -203,6 +203,7 @@ class RSolr::Client
     rescue Errno::ECONNREFUSED, Faraday::Error::ConnectionFailed
       raise RSolr::Error::ConnectionRefused, request_context.inspect
     rescue Faraday::Error => e
+      puts e.full_message
       raise RSolr::Error::Http.new(request_context, e.response)
     end
     adapt_response(request_context, raw_response) unless raw_response.nil?
@@ -295,8 +296,8 @@ class RSolr::Client
 
       Faraday.new(conn_opts) do |conn|
         conn.basic_auth(uri.user, uri.password) if uri.user && uri.password
-        conn.response :logger if ENV["SOLR_LOG_HTTP"].present?
         conn.response :raise_error
+        conn.response :logger, nil, { headers: true, bodies: true }
         conn.request :retry, max: options[:retry_after_limit], interval: 0.05,
                              interval_randomness: 0.5, backoff_factor: 2,
                              exceptions: ['Faraday::Error', 'Timeout::Error'] if options[:retry_503]
